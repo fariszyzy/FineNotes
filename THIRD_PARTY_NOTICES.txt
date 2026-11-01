@@ -140,6 +140,25 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 
+tesseract.js, tesseract.js-core, and Tesseract OCR tessdata
+-----------------------------------------------------------
+
+Licensed under the Apache License, Version 2.0:
+https://www.apache.org/licenses/LICENSE-2.0
+https://github.com/naptha/tesseract.js
+https://github.com/tesseract-ocr/tessdata_best
+
+Copyright (c) Naptha, Jerome Wu, and Tesseract.js contributors.
+Tesseract OCR engine and English LSTM model data Copyright (c) Google Inc.
+and contributors, licensed under the Apache License, Version 2.0.
+Bundled sub-dependencies of tesseract.js (regenerator-runtime, MIT License,
+Copyright (c) 2014-present Facebook, Inc.; idb-keyval, Apache-2.0, Copyright
+(c) 2016 Jake Archibald; is-url, MIT License, Copyright (c) 2014 Segment.io
+Inc.; bmp-js, MIT License, Copyright (c) 2014 shaozilee; wasm-feature-detect,
+Apache-2.0, Copyright (c) Google Inc.) are used under their respective
+permissive licenses.
+
+
 Grape 1.0, the FineNotes handwriting model (models/grape-1.0.bin)
 -----------------------------------------------------------------
 

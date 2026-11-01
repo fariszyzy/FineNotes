@@ -31,7 +31,8 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "fflate": "0.8.3",
-    "pdf-lib": "1.17.1"
+    "pdf-lib": "1.17.1",
+    "tesseract.js": "7.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
