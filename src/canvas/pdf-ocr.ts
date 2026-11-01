@@ -78,14 +78,7 @@ export function invertMatrix(m: Matrix): Matrix | null {
   const [a, b, c, d, e, f] = m;
   const det = a * d - b * c;
   if (!Number.isFinite(det) || Math.abs(det) < 1e-12) return null;
-  return [
-    d / det,
-    -b / det,
-    -c / det,
-    a / det,
-    (c * f - d * e) / det,
-    (b * e - a * f) / det,
-  ];
+  return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
 }
 
 /** Count non-whitespace characters present in pdf.js `getTextContent` items. */
@@ -191,7 +184,7 @@ interface BlockGroup {
 }
 
 function projectNativeItem(item: PdfTextItem, viewport: Matrix): ViewportBox | null {
-  if (item.vertical || item.str.trim() === "") return null;
+  if (item.vertical || item.str.length === 0) return null;
   const t = item.transform;
   if (t.length < 6 || !t.every(Number.isFinite) || !(item.width > 0)) return null;
   const scaleX = Math.hypot(t[0], t[1]);
@@ -234,7 +227,10 @@ function isReliableWord(word: OcrWord, sourceHeight: number, sy: number): boolea
   if (!Number.isFinite(word.confidence) || word.confidence < MIN_WORD_CONFIDENCE) return false;
   const { x0, y0, x1, y1 } = word.bbox;
   if (![x0, y0, x1, y1].every(Number.isFinite) || !(x1 > x0) || !(y1 > y0)) return false;
-  if ((y1 - y0) * sy > sourceHeight * 0.25 && trimmed.length <= 2) return false;
+  const w = x1 - x0;
+  const h = y1 - y0;
+  if (h * sy > sourceHeight * 0.25 && trimmed.length <= 2) return false;
+  if (trimmed === "|" && (w < 0.35 * h || word.confidence < 88)) return false;
   if (trimmed.length === 1 && !/[0-9A-Za-z]/.test(trimmed)) {
     return word.confidence >= MIN_SYMBOL_CONFIDENCE;
   }
@@ -279,7 +275,7 @@ function groupNativeLines(placed: readonly PlacedNative[]): {
   const unplaced: PdfTextItem[] = [];
   for (const { item, box } of placed) {
     if (!box) {
-      unplaced.push(item);
+      if (item.str.trim() !== "") unplaced.push(item);
       continue;
     }
     const prev = groups[groups.length - 1];
@@ -337,6 +333,7 @@ export function ocrBlocksToItems(input: OcrMergeInput): PdfTextItem[] {
     box: projectNativeItem(item, viewport),
   }));
   const nativeBoxes = placedNative
+    .filter((p) => p.item.str.trim() !== "")
     .map((p) => p.box)
     .filter((box): box is ViewportBox => box !== null);
 

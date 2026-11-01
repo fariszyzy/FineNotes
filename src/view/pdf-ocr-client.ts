@@ -172,9 +172,7 @@ export class PdfOcrClient {
     const coreJs = decoder.decode(coreBuf);
     const workerJs = decoder.decode(workerBuf);
 
-    const langBlobUrl = URL.createObjectURL(
-      new Blob([trainedData], { type: "application/gzip" }),
-    );
+    const langBlobUrl = URL.createObjectURL(new Blob([trainedData], { type: "application/gzip" }));
     const workerBlobUrl = URL.createObjectURL(
       new Blob([coreJs, "\n;\n", buildWorkerShim(langBlobUrl), "\n;\n", workerJs], {
         type: "text/javascript",

@@ -8,7 +8,13 @@ import {
   ocrBlocksToItems,
   ocrRenderPlan,
 } from "../../src/canvas/pdf-ocr";
-import { type Matrix, layoutText, multiply, pdfToPage, selectText } from "../../src/canvas/pdf-text";
+import {
+  type Matrix,
+  layoutText,
+  multiply,
+  pdfToPage,
+  selectText,
+} from "../../src/canvas/pdf-text";
 
 describe("invertMatrix", () => {
   it("inverts upright and rotated PDF viewports and returns null when singular", () => {
@@ -230,5 +236,42 @@ describe("ocrBlocksToItems", () => {
       "Ovary failure",
       "Turner",
     ]);
+  });
+
+  it("keeps native space items inside their heading line and filters thin border pipes", () => {
+    const viewport: Matrix = [1, 0, 0, -1, 0, 800];
+    const source = { width: 600, height: 800 };
+    const geometry = { width: 600, height: 800 };
+
+    const nativeItems = [
+      { str: "Definitions", transform: [16, 0, 0, 16, 40, 700], width: 80, height: 16 },
+      { str: " ", transform: [16, 0, 0, 16, 120, 700], width: 5, height: 16 },
+      { str: "&", transform: [16, 0, 0, 16, 125, 700], width: 12, height: 16 },
+      { str: " ", transform: [16, 0, 0, 16, 137, 700], width: 5, height: 16 },
+      { str: "compartments", transform: [16, 0, 0, 16, 142, 700], width: 100, height: 16 },
+    ];
+
+    const blocks: OcrBlock[] = [
+      {
+        bbox: { x0: 480, y0: 690, x1: 482, y1: 708 },
+        lines: [
+          {
+            bbox: { x0: 480, y0: 690, x1: 482, y1: 708 },
+            words: [{ text: "|", bbox: { x0: 480, y0: 690, x1: 482, y1: 708 }, confidence: 70 }],
+          },
+        ],
+      },
+    ];
+
+    const merged = ocrBlocksToItems({
+      blocks,
+      canvasSize: { width: 600, height: 800 },
+      viewport,
+      source,
+      nativeItems,
+    });
+    const layout = layoutText(merged, pdfToPage(viewport, source, geometry));
+    expect(layout.lines).toHaveLength(1);
+    expect(layout.chars.map((c) => c.ch).join("")).toBe("Definitions & compartments");
   });
 });

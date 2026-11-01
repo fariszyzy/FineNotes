@@ -12,6 +12,7 @@ const pdf = {
   pages: 3,
   fail: false,
   items: [] as unknown[],
+  fnArray: [] as number[],
   cMapUrl: undefined as string | undefined,
   cMapPacked: undefined as boolean | undefined,
 };
@@ -20,6 +21,7 @@ vi.mock("obsidian", async () => ({
   ...(await import("./fake-obsidian")),
   loadPdfJs: () =>
     Promise.resolve({
+      OPS: { fill: 22, paintImageXObject: 85, constructPath: 91 },
       getDocument: (src: { cMapUrl?: string; cMapPacked?: boolean }) => {
         pdf.opened++;
         pdf.cMapUrl = src.cMapUrl;
@@ -42,6 +44,7 @@ vi.mock("obsidian", async () => ({
                     styles: { f1: { ascent: 0.9, descent: -0.3, vertical: false } },
                   });
                 },
+                getOperatorList: () => Promise.resolve({ fnArray: pdf.fnArray }),
                 cleanup: () => undefined,
               }),
             destroy: () => Promise.resolve(),
@@ -52,18 +55,19 @@ vi.mock("obsidian", async () => ({
 }));
 
 const { PdfTextCache, readTextItems } = await import("../../src/view/pdf-text-source");
+type OcrArg = ConstructorParameters<typeof PdfTextCache>[1];
 
 const BACKDROP = { kind: "pdf" as const, path: "Slides.pdf", page: 0 };
 const GEOMETRY = { width: 600, height: 800 };
 
-function cache(file: object | null = {}): InstanceType<typeof PdfTextCache> {
+function cache(file: object | null = {}, ocr?: OcrArg): InstanceType<typeof PdfTextCache> {
   const app = {
     vault: {
       getFileByPath: () => file,
       readBinary: () => Promise.resolve(new ArrayBuffer(8)),
     },
   };
-  return new PdfTextCache(app as never);
+  return new PdfTextCache(app as never, ocr);
 }
 
 /** Resolve when `c` says a page landed. */
@@ -83,6 +87,7 @@ afterEach(() => {
   pdf.reads = 0;
   pdf.fail = false;
   pdf.items = [];
+  pdf.fnArray = [];
 });
 
 describe("readTextItems", () => {
@@ -209,5 +214,139 @@ describe("PdfTextCache", () => {
     expect(c.peek(BACKDROP, GEOMETRY)).toBeNull();
     expect(c.peek({ ...BACKDROP, page: 200 }, GEOMETRY)).not.toBeNull();
     pdf.pages = 3;
+  });
+
+  it("delivers native headings first, then merges OCR words on hybrid outlined pages", async () => {
+    pdf.items = [
+      {
+        str: "Amenorrhea",
+        transform: [20, 0, 0, 20, 40, 740],
+        width: 120,
+        height: 20,
+        fontName: "f1",
+      },
+    ];
+    // 300 filled vector paths vs 10 native characters -> needsPageOcr is true.
+    pdf.fnArray = new Array(300).fill(22);
+
+    let resolveOcr!: (value: unknown[]) => void;
+    const ocrResult = new Promise<never[]>((resolve) => {
+      resolveOcr = resolve as never;
+    });
+    const recognize = vi.fn(() => ocrResult);
+    const c = cache(
+      {},
+      {
+        isModelReady: () => Promise.resolve(true),
+        offerModel: vi.fn(),
+        recognize,
+        renderPagePng: () => Promise.resolve(new Uint8Array([1, 2, 3])),
+      },
+    );
+
+    const firstReady = landed(c);
+    c.request(BACKDROP);
+    await firstReady;
+
+    // Native heading is available immediately before OCR finishes.
+    const initialLayout = c.peek(BACKDROP, GEOMETRY);
+    expect(initialLayout?.lines).toHaveLength(1);
+
+    const secondReady = landed(c);
+    // OCR plan for 600x800 is scale 2.5 -> 1500x2000.
+    resolveOcr([
+      {
+        bbox: { x0: 100, y0: 110, x1: 400, y1: 160 },
+        lines: [
+          {
+            bbox: { x0: 100, y0: 110, x1: 400, y1: 160 },
+            words: [
+              { text: "Amenorrhea", bbox: { x0: 100, y0: 110, x1: 400, y1: 160 }, confidence: 95 },
+            ],
+          },
+        ],
+      },
+      {
+        bbox: { x0: 100, y0: 500, x1: 500, y1: 545 },
+        lines: [
+          {
+            bbox: { x0: 100, y0: 500, x1: 500, y1: 545 },
+            words: [
+              { text: "Asherman", bbox: { x0: 100, y0: 500, x1: 300, y1: 545 }, confidence: 93 },
+              { text: "syndrome", bbox: { x0: 320, y0: 500, x1: 500, y1: 545 }, confidence: 94 },
+            ],
+          },
+        ],
+      },
+    ]);
+    await secondReady;
+
+    // Layout cache was invalidated and rebuilt with deduplicated heading + OCR body text.
+    const mergedLayout = c.peek(BACKDROP, GEOMETRY);
+    const lines = mergedLayout?.lines.map((l) =>
+      mergedLayout.chars
+        .slice(l.start, l.end)
+        .map((ch) => ch.ch)
+        .join(""),
+    );
+    expect(lines).toEqual(["Amenorrhea", "Asherman syndrome"]);
+  });
+
+  it("offers the OCR model download once when missing and runs pending pages once ready", async () => {
+    pdf.items = [];
+    pdf.fnArray = [85]; // 1 scanned image
+
+    let ready = false;
+    const listeners: Array<() => void> = [];
+    const offerModel = vi.fn();
+    const recognize = vi.fn(() =>
+      Promise.resolve([
+        {
+          bbox: { x0: 100, y0: 200, x1: 350, y1: 240 },
+          lines: [
+            {
+              bbox: { x0: 100, y0: 200, x1: 350, y1: 240 },
+              words: [
+                { text: "Scanned", bbox: { x0: 100, y0: 200, x1: 350, y1: 240 }, confidence: 91 },
+              ],
+            },
+          ],
+        },
+      ]),
+    );
+
+    const c = cache(
+      {},
+      {
+        isModelReady: () => Promise.resolve(ready),
+        offerModel,
+        onModelChange: (fn) => {
+          listeners.push(fn);
+          return () => {
+            const idx = listeners.indexOf(fn);
+            if (idx >= 0) listeners.splice(idx, 1);
+          };
+        },
+        recognize,
+        renderPagePng: () => Promise.resolve(new Uint8Array([9])),
+      },
+    );
+
+    const nativeLanded = landed(c);
+    c.request(BACKDROP);
+    await nativeLanded;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(offerModel).toHaveBeenCalledWith("auto");
+    expect(recognize).not.toHaveBeenCalled();
+
+    const ocrLanded = landed(c);
+    ready = true;
+    for (const fn of [...listeners]) fn();
+    await ocrLanded;
+
+    expect(recognize).toHaveBeenCalledOnce();
+    const layout = c.peek(BACKDROP, GEOMETRY);
+    expect(layout?.chars.map((ch) => ch.ch).join("")).toBe("Scanned");
   });
 });

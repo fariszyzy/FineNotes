@@ -10108,8 +10108,13 @@ export class InkSurface {
    * pages either side read, so the first stroke on them can snap.
    */
   private prefetchText(): void {
-    if (!this.textSource || this.toolState.tool !== "highlighter") return;
-    for (const index of [this.pageIndex, this.pageIndex + 1, this.pageIndex - 1]) {
+    if (!this.textSource) return;
+    if (this.toolState.tool !== "highlighter" && this.toolState.tool !== "select") return;
+    const indices =
+      this.toolState.tool === "highlighter"
+        ? [this.pageIndex, this.pageIndex + 1, this.pageIndex - 1]
+        : [this.pageIndex];
+    for (const index of indices) {
       this.pageText(index);
     }
   }

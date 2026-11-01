@@ -3077,7 +3077,7 @@ export class InkView extends TextFileView {
     this.setPenCursor(this.settings.penCursor);
     this.surface.setInkPressure(this.settings.pressureWidth);
     this.pdfText?.destroy();
-    this.pdfText = new PdfTextCache(this.app);
+    this.pdfText = new PdfTextCache(this.app, this.plugin.pdfOcrDeps());
     // A finger tap on a PDF link that waited for the page to be read.
     this.pdfText.onReady = (path, page) => this.surface?.pdfTextReady(path, page);
     this.surface.setTextSource(this.pdfText);
@@ -4673,6 +4673,29 @@ export class InkView extends TextFileView {
   /** Copy the PDF text under the highlights on the page in view. */
   copyHighlightedText(): void {
     this.surface?.copyHighlightedText();
+  }
+
+  /** Run on-device OCR on the current PDF page so scanned or outlined text can be selected. */
+  async readPdfPageText(): Promise<void> {
+    const shown = this.currentPageInk();
+    const backdrop = shown?.page.backdrop;
+    if (!backdrop || backdrop.kind !== "pdf" || !this.pdfText) {
+      new Notice("This page is not a PDF page.");
+      return;
+    }
+    const notice = new Notice("Reading PDF text on this page…", 0);
+    try {
+      const status = await this.pdfText.requestOcr(backdrop, "ask");
+      if (status === "ready") {
+        new Notice("PDF text is ready to highlight and copy on this page.");
+      } else if (status === "empty") {
+        new Notice("No additional text was found on this PDF page.");
+      } else if (status === "unavailable") {
+        new Notice("Could not read PDF text on this page.");
+      }
+    } finally {
+      notice.hide();
+    }
   }
 
   /**

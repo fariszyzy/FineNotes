@@ -18,6 +18,9 @@ import { DEFAULT_FILL_COLOR, type FillGap, readFillGap } from "./model/fill-regi
 import { FileExplorerNotebookButton } from "./view/file-explorer-notebook-button";
 import { ExplorerFolderNotebooks } from "./view/explorer-folder-notebooks";
 import { WordCheck } from "./view/word-check";
+import { OCR_MODEL, OCR_MODEL_ID } from "./recognition/ocr-model";
+import { PdfOcrClient } from "./view/pdf-ocr-client";
+import type { PdfTextOcrDeps } from "./view/pdf-text-source";
 import { followPairRename } from "./model/folder-notebook";
 import { DEFAULT_SHAPE_COLOR, parseHexColor, recentColorsOf } from "./model/colors";
 import { tapeColorOf, tapeHeightOf } from "./model/cover-tape";
@@ -303,6 +306,19 @@ export default class GoodObsidianPlugin extends Plugin {
 
   /** Grape, downloaded on first use, or written from the bundle (grape-files.ts). */
   readonly grape = new GrapeFiles(this.models);
+
+  /** On-device PDF OCR worker client, started on first use and released when idle. */
+  readonly pdfOcr = new PdfOcrClient(() => this.models.register(OCR_MODEL));
+
+  pdfOcrDeps(): PdfTextOcrDeps {
+    const store = this.models.register(OCR_MODEL);
+    return {
+      isModelReady: async () => (await store.check()).kind === "ready",
+      offerModel: (how) => this.models.offer(OCR_MODEL_ID, how),
+      onModelChange: (listener) => store.subscribe(listener),
+      recognize: (pngBytes) => this.pdfOcr.recognize(pngBytes),
+    };
+  }
   /** Whether a newer FineNotes is out: the dot on the gear (update-notice.ts). */
   readonly updates = new UpdateNotice({
     current: this.manifest.version,
@@ -400,8 +416,9 @@ export default class GoodObsidianPlugin extends Plugin {
 
     await this.loadSettings();
     this.installFullScreen();
-    // The chosen speech model shows under Settings › Models on this device from the start.
+    // The chosen speech model and PDF OCR model show under Settings › Models on this device from the start.
     this.speech.store();
+    this.models.register(OCR_MODEL);
     await this.setUpKeyStore();
     // A pen picked just before the plugin stops is still kept.
     this.register(() => {
@@ -506,6 +523,7 @@ export default class GoodObsidianPlugin extends Plugin {
       this.learner.dispose();
       this.handwriting.dispose();
       this.speech.dispose();
+      this.pdfOcr.dispose();
       this.models.dispose();
     });
     // A release that still bundles Grape writes it to the handwriting folder,
@@ -630,6 +648,12 @@ export default class GoodObsidianPlugin extends Plugin {
     );
     this.notebookCommand("copy-highlighted-text", "Copy highlighted text on this page", (view) =>
       view.copyHighlightedText(),
+    );
+    this.notebookCommand(
+      "read-pdf-page-text",
+      "Read PDF text on this page",
+      (view) => view.readPdfPageText(),
+      pages,
     );
     // No default hotkey: desktop users give it one (FineNotes#42).
     this.notebookCommand(

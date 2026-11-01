@@ -448,6 +448,7 @@ describe("registration", () => {
         "learn-handwriting",
         "new-from-template",
         "read-handwriting-on-device",
+        "read-pdf-page-text",
         "recognize-handwriting",
         "scan-document",
         "save-as-template",

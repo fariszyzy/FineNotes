@@ -10,6 +10,13 @@ extracted from the matching section of this file by `release.yml`.
 
 ### Added
 
+- **Read printed PDF text on device.** Pages in scanned PDFs or PDFs whose body
+  text was converted to outlines are recognized offline with Tesseract so the
+  highlighter snaps to lines, the floating Copy button appears, and the lasso's
+  Copy text and Copy highlighted text on this page copy the printed words
+  without duplicating any embedded PDF text. The ~7.0 MB English OCR engine is
+  downloaded once to `ocr/` and managed under Settings → Models on this device,
+  and the Command Palette adds Read PDF text on this page.
 - **Fold a sticky note away, and type on it**
   ([#94](https://github.com/Joost-8/FineNotes/issues/94)). A selected
   note's bar has Fold note: the note shrinks to a small note icon at its
