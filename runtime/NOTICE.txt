@@ -1,0 +1,9 @@
+FineNotes on-device OCR runtime (data only, no code).
+
+ort-wasm-simd-threaded-1.30.0.wasm   The WebAssembly binary of onnxruntime-web 1.30.0 (MIT licence,
+                                     Microsoft), byte for byte the file in the npm package
+                                     onnxruntime-web@1.30.0, dist/ort-wasm-simd-threaded.wasm.
+                                     14,239,897 bytes, SHA-256
+                                     3398c10d07d229bd91b364548e130e0e51a8e5704b88c7c083ebbeb78842dee2.
+Hosted here because jsDelivr serves it brotli-compressed even to a request for the identity
+encoding, which makes a ranged download count compressed bytes.
