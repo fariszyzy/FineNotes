@@ -1,0 +1,21 @@
+FineNotes on-device OCR models, set "ppocrv6-medium-1" (data only, no code).
+
+Files
+  PP-OCRv6_medium_rec.ort   PaddleOCR PP-OCRv6 medium text recogniser (SVTR, CTC), ONNX Runtime
+                         format. Unchanged from recognition/ort/PP-OCRv6_medium_rec.ort of
+                         https://github.com/PT-Perkasa-Pilar-Utama/ppu-paddle-ocr-models
+  ppocrv6_dict.txt       Its character dictionary (unchanged, same repository).
+
+The text detector (PP-OCRv5_mobile_det_infer.ort) is shared with the set "ppocrv6-1" and is not repeated here.
+
+Origin and licence
+  The weights are PaddleOCR's (https://github.com/PaddlePaddle/PaddleOCR), Copyright (c)
+  PaddlePaddle Authors, licensed under the Apache License, Version 2.0 (the text is in LICENSE
+  in this folder; the same text is the licence of the ppu-paddle-ocr-models repository that
+  converted them). They are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+  OF ANY KIND. No file here was modified.
+
+Why they are here
+  FineNotes downloads them on first use, each pinned by exact size and SHA-256 in
+  src/recognition/ocr/ocr-model.ts of the main branch, from raw.githubusercontent.com (this
+  branch), so the download needs neither a Git LFS bandwidth budget nor Hugging Face.
