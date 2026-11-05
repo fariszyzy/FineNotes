@@ -8,6 +8,27 @@ extracted from the matching section of this file by `release.yml`.
 
 ## [Unreleased]
 
+### Added
+
+- **A Folders sidebar for the simple look.** With the simple look on, the left side
+  now shows a tree of the vault's folders instead of being hidden: a filter,
+  starred and recently opened folders, the number of notes in each folder, and one
+  menu per folder (rename, new subfolder, star, colour, delete, and what other
+  plugins add). Tapping a folder shows it in the notebook library. Hold a folder on
+  an iPad and let go for the menu, or drag it onto another folder to move it. The
+  pencil at the top shows the options button on every folder. Stars and colours are
+  the library's own.
+- **Any colour for a folder.** The folder's menu opens the colour picker, with
+  your recent colours. A colour that is not one of the nine presets is now kept in
+  the settings instead of being dropped (an older FineNotes shows it as the default
+  colour again).
+
+### Changed
+
+- The simple look no longer hides the left side: the Folders sidebar is there, and
+  Obsidian's other left tabs stay hidden. Turning the simple look off brings
+  Obsidian's own sidebars back and takes the Folders sidebar away.
+
 ## [2.8.2] - 2026-11-05
 
 ### Added

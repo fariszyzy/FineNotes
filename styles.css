@@ -15614,17 +15614,25 @@ button.goodobsidian-edit-menu-row {
 
 /* --- The simple look (model/simple-mode.ts) ----------------------------- */
 
-/* Obsidian's own chrome tucked away; the tabs stay. Nothing is removed. */
+/* Obsidian's own chrome tucked away; the tabs stay, and the left side keeps
+   the Folders sidebar (src/view/folders-sidebar.ts). Nothing is removed. */
 body.goodobsidian-simple .status-bar,
 body.goodobsidian-simple .workspace-ribbon,
-body.goodobsidian-simple .workspace-split.mod-left-split,
 body.goodobsidian-simple .workspace-split.mod-right-split,
-body.goodobsidian-simple .workspace-drawer,
-body.goodobsidian-simple .sidebar-toggle-button {
+body.goodobsidian-simple .workspace-drawer.mod-right,
+body.goodobsidian-simple .sidebar-toggle-button.mod-right {
+  display: none;
+}
+/* The left side shows only Folders: Obsidian's other left tabs stay out of reach. */
+body.goodobsidian-simple .workspace-split.mod-left-split .workspace-tab-header-container {
   display: none;
 }
 body.goodobsidian-simple
-  .workspace-leaf-content:is([data-type="goodobsidian-view"], [data-type="finenotes-library"])
+  .workspace-leaf-content:is(
+    [data-type="goodobsidian-view"],
+    [data-type="finenotes-library"],
+    [data-type="finenotes-folders"]
+  )
   > .view-header {
   display: none;
 }
@@ -16462,4 +16470,355 @@ button.goodobsidian-library-fold .goodobsidian-library-fold-caret {
 button.goodobsidian-library-fold .svg-icon {
   width: 16px;
   height: 16px;
+}
+
+/* --- The Folders sidebar (src/view/folders-sidebar.ts) --------------------- */
+
+.workspace-leaf-content[data-type="finenotes-folders"] > .view-content {
+  padding: 0;
+}
+.goodobsidian-folders {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.goodobsidian-folders-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  padding: 10px 8px 2px 14px;
+}
+.goodobsidian-folders-title {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.goodobsidian-folders-tools {
+  display: flex;
+  gap: 2px;
+}
+.goodobsidian-folders-tool[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+  color: var(--interactive-accent);
+}
+.goodobsidian-folders-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  margin: 4px 10px 6px;
+}
+.goodobsidian-folders-filter-icon {
+  position: absolute;
+  left: 9px;
+  display: flex;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+.goodobsidian-folders-filter-icon .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+.goodobsidian-folders-filter-input {
+  width: 100%;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 32px 0 30px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  box-shadow: none;
+  font-size: 13px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.goodobsidian-folders-filter-input:focus {
+  border-color: var(--interactive-accent);
+}
+.goodobsidian-folders-filter .goodobsidian-folders-filter-clear {
+  position: absolute;
+  right: 2px;
+  display: none;
+}
+.goodobsidian-folders-filter
+  .goodobsidian-folders-filter-input:not(:placeholder-shown)
+  ~ .goodobsidian-folders-filter-clear {
+  display: inline-flex;
+}
+.goodobsidian-folders-list {
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 0 6px calc(24px + var(--goodobsidian-keyboard-pad, 0px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.goodobsidian-folders-list.is-drop-target,
+.goodobsidian-folders-head.is-drop-target {
+  background: color-mix(in srgb, var(--interactive-accent) 10%, transparent);
+}
+.goodobsidian-folders-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 6px 4px;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.goodobsidian-folders-label-chevron {
+  display: inline-flex;
+  transition: transform 0.12s ease;
+}
+.goodobsidian-folders-label.is-collapsed .goodobsidian-folders-label-chevron {
+  transform: rotate(-90deg);
+}
+.goodobsidian-folders-label-chevron .svg-icon {
+  width: 12px;
+  height: 12px;
+}
+.goodobsidian-folders-empty {
+  padding: 16px 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* A folder row: a bar of the folder's colour on its edge, its icon, name and note count. */
+.goodobsidian-folders-row {
+  --goodobsidian-folders-indent: 14px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  margin: 1px 0;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+.goodobsidian-folders-row::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--goodobsidian-folders-color, transparent);
+}
+.goodobsidian-folders-row:hover {
+  background: var(--background-modifier-hover);
+}
+.goodobsidian-folders-row.is-selected {
+  background: var(--background-modifier-active-hover);
+}
+.goodobsidian-folders-row.is-selected .goodobsidian-folders-name {
+  font-weight: 600;
+}
+.goodobsidian-folders-row:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--interactive-accent);
+}
+.goodobsidian-folders-row.is-drop-target {
+  background: color-mix(in srgb, var(--interactive-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px var(--interactive-accent);
+}
+.goodobsidian-folders-row.is-lifted {
+  transform: scale(1.02);
+  background: var(--background-primary);
+}
+.goodobsidian-folders-row-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 2px 4px 2px
+    calc(8px + var(--goodobsidian-folders-depth, 0) * var(--goodobsidian-folders-indent));
+}
+.goodobsidian-folders-chevron-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+.goodobsidian-folders-chevron {
+  display: inline-flex;
+  color: var(--text-faint);
+  transition: transform 0.12s ease;
+}
+.goodobsidian-folders-chevron.is-open {
+  transform: rotate(90deg);
+}
+.goodobsidian-folders-chevron .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+.goodobsidian-folders-glyph {
+  display: inline-flex;
+  flex: none;
+  color: var(--goodobsidian-folders-color, var(--text-faint));
+}
+.goodobsidian-folders-glyph .svg-icon {
+  width: 16px;
+  height: 16px;
+  fill: color-mix(in srgb, var(--goodobsidian-folders-color, transparent) 22%, transparent);
+}
+.goodobsidian-folders-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.goodobsidian-folders-name mark {
+  padding: 0;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--interactive-accent) 28%, transparent);
+  color: inherit;
+}
+.goodobsidian-folders-count {
+  flex: none;
+  min-width: 16px;
+  padding: 0 2px;
+  color: var(--text-faint);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+/* One options button per row: on hover or focus, or on every row in edit mode. */
+.goodobsidian-folders-row .goodobsidian-folders-more {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  display: none;
+  transform: translateY(-50%);
+}
+.goodobsidian-folders-row:hover .goodobsidian-folders-more,
+.goodobsidian-folders-row:focus-within .goodobsidian-folders-more,
+.goodobsidian-folders.is-editing .goodobsidian-folders-row .goodobsidian-folders-more {
+  display: inline-flex;
+}
+.goodobsidian-folders-row:hover .goodobsidian-folders-count,
+.goodobsidian-folders-row:focus-within .goodobsidian-folders-count,
+.goodobsidian-folders.is-editing .goodobsidian-folders-count {
+  visibility: hidden;
+}
+.goodobsidian-folders-create-input {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border: 1px solid var(--interactive-accent);
+  border-radius: 4px;
+  box-shadow: none;
+  font-size: 14px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Touch: a hold shows the menu, so the button shows only in edit mode or on the open folder. */
+body.is-mobile .goodobsidian-folders-row {
+  --goodobsidian-folders-indent: 16px;
+  min-height: 44px;
+}
+body.is-mobile .goodobsidian-folders-row:hover:not(.is-selected) {
+  background: transparent;
+}
+body.is-mobile .goodobsidian-folders-row:hover .goodobsidian-folders-more,
+body.is-mobile .goodobsidian-folders-row:focus-within .goodobsidian-folders-more {
+  display: none;
+}
+body.is-mobile .goodobsidian-folders-row.is-selected .goodobsidian-folders-more,
+body.is-mobile
+  .goodobsidian-folders.is-editing
+  .goodobsidian-folders-row
+  .goodobsidian-folders-more {
+  display: inline-flex;
+}
+body.is-mobile .goodobsidian-folders-row:hover .goodobsidian-folders-count,
+body.is-mobile .goodobsidian-folders-row:focus-within .goodobsidian-folders-count {
+  visibility: visible;
+}
+body.is-mobile .goodobsidian-folders-row.is-selected .goodobsidian-folders-count,
+body.is-mobile .goodobsidian-folders.is-editing .goodobsidian-folders-count {
+  visibility: hidden;
+}
+body.is-mobile .goodobsidian-folders-name {
+  font-size: 15px;
+}
+body.is-mobile .goodobsidian-folders-filter-input,
+body.is-mobile .goodobsidian-folders-create-input {
+  height: 40px;
+  font-size: 16px;
+}
+body.is-mobile .goodobsidian-folders-chevron-slot {
+  width: 28px;
+  height: 28px;
+}
+body.is-mobile .goodobsidian-folders-glyph .svg-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* The copy of a folder that follows the finger, and the hint shown while one is lifted. */
+.goodobsidian-folders-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--layer-notice);
+  width: var(--goodobsidian-ghost-width);
+  box-sizing: border-box;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  opacity: 0.9;
+  pointer-events: none;
+  transform: translate(
+      calc(var(--goodobsidian-ghost-x) - var(--goodobsidian-ghost-width) / 2),
+      calc(var(--goodobsidian-ghost-y) - 22px)
+    )
+    scale(0.7);
+  will-change: transform;
+}
+.goodobsidian-folders-ghost .goodobsidian-folders-more,
+.goodobsidian-folders.is-editing .goodobsidian-folders-ghost .goodobsidian-folders-more {
+  display: none;
+}
+.goodobsidian-folders-drag-hint {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  z-index: var(--layer-notice);
+  padding: 8px 14px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 999px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 13px;
+  pointer-events: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }

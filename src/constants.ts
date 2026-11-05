@@ -11,6 +11,8 @@ export const VIEW_TYPE_INK = "goodobsidian-view";
 
 /** The view type id of the notebook library; saved in workspace layouts. */
 export const VIEW_TYPE_LIBRARY = "finenotes-library";
+/** The Folders sidebar, shown on the left while the simple look is on. */
+export const VIEW_TYPE_FOLDERS = "finenotes-folders";
 
 /**
  * The plugin id every release before the public one used. Settings saved

@@ -961,7 +961,7 @@ export class GoodObsidianSettingTab extends PluginSettingTab {
           "sidebar",
           "ribbon",
         ]),
-        t("settings.simpleLook.info"),
+        t("settings.simpleLook.infoFolders"),
       ),
     ];
   }

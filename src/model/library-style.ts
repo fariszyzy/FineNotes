@@ -5,6 +5,7 @@
  */
 
 import type { TextKey } from "../i18n/translate";
+import { parseHexColor } from "./colors";
 
 export interface FolderStyle {
   color?: string;
@@ -45,7 +46,10 @@ export const FOLDER_ICONS: ReadonlyArray<{ id: string; name: TextKey }> = [
 export const DEFAULT_FOLDER_COLOR = FOLDER_COLORS[0].color;
 export const DEFAULT_FOLDER_ICON = FOLDER_ICONS[0].id;
 
-/** The saved looks, cleaned: known colours and icons only, nothing empty. */
+/**
+ * The saved looks, cleaned: a preset or any hex colour, a known icon, nothing
+ * empty. A colour the picker made (`#ABC`, `#aabbcc`) is kept as `#aabbcc`.
+ */
 export function folderStylesOf(raw: unknown): FolderStyles {
   const out: FolderStyles = {};
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return out;
@@ -53,7 +57,8 @@ export function folderStylesOf(raw: unknown): FolderStyles {
     if (path === "" || typeof value !== "object" || value === null) continue;
     const { color, icon } = value as FolderStyle;
     const style: FolderStyle = {};
-    if (FOLDER_COLORS.some((c) => c.color === color)) style.color = color;
+    const hex = typeof color === "string" ? parseHexColor(color) : null;
+    if (hex !== null) style.color = hex;
     if (FOLDER_ICONS.some((i) => i.id === icon)) style.icon = icon;
     if (style.color !== undefined || style.icon !== undefined) out[path] = style;
   }

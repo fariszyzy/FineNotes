@@ -153,8 +153,8 @@ export const settings = {
   "settings.libraryExplorer.info":
     "Add a button that opens the notebook library, beside New note and New folder in the file explorer.",
   "settings.simpleLook.name": "Simple look",
-  "settings.simpleLook.info":
-    "Hide Obsidian's title bar, status bar, left ribbon and sidebars, and keep the tabs, so FineNotes looks like an app of its own. Turn it off here to bring them back.",
+  "settings.simpleLook.infoFolders":
+    "Show a Folders sidebar on the left, beside the tabs, and hide Obsidian's title bar, status bar, ribbon and right sidebar, so FineNotes looks like an app of its own. Turn it off here to bring Obsidian back.",
   "settings.folderNotebooks.name": "Show notebook folders as notebooks",
   "settings.folderNotebooks.info":
     "In the file explorer, a notebook with its own folder shows as that folder: tap its name to open the notebook, or its arrow for its pictures, recordings and other files. Renaming one renames the other.",

@@ -60,7 +60,7 @@ An area's agent edits only these files plus src/i18n/en/<area>.ts.
 - src/view/table-cell-editor.ts
 - src/view/text-pick-view.ts
 
-## notebooks (29)
+## notebooks (32)
 
 - src/canvas/paper-style.ts
 - src/canvas/scan-filters.ts
@@ -79,6 +79,9 @@ An area's agent edits only these files plus src/i18n/en/<area>.ts.
 - src/view/export-modal.ts
 - src/view/file-explorer-notebook-button.ts
 - src/view/folder-suggest.ts
+- src/view/folders-menu.ts
+- src/view/folders-sidebar.ts
+- src/view/folders-touch-drag.ts
 - src/view/import-notebook-modal.ts
 - src/view/load-guard.ts
 - src/view/new-notebook-modal.ts

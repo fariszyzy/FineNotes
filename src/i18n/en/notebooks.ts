@@ -392,7 +392,9 @@ export const notebooks = {
   "notebooks.command.createWithLastSettings": "Create notebook with last settings",
   "notebooks.command.showWelcome": "Show the welcome",
   "notebooks.command.openLibrary": "Open the notebook library",
-  "notebooks.command.simpleLook": "Simple look: hide or show Obsidian's tabs, sidebars and menus",
+  "notebooks.command.simpleLookFolders":
+    "Simple look: switch between the Folders look and Obsidian's own tabs, sidebars and menus",
+  "notebooks.command.showFolders": "Show the Folders sidebar",
   "notebooks.command.newFromPdf": "New notebook from a PDF in the vault…",
   "notebooks.command.convertToNotebook": "Convert single page to notebook",
   "notebooks.command.scanDocument": "Scan document into this notebook",
@@ -656,8 +658,8 @@ export const notebooks = {
   "notebooks.noteSettings.updateOpen": "Open FineNotes in Community plugins to update it",
   "notebooks.noteSettings.muteUpdate": "Don't show again",
   "notebooks.noteSettings.look": "Look",
-  "notebooks.noteSettings.simpleLookDesc":
-    "Hide Obsidian's sidebars, ribbon and bars. Off brings normal Obsidian back.",
+  "notebooks.noteSettings.simpleLookDescFolders":
+    "Show the Folders sidebar and tabs, and hide Obsidian's ribbon and bars. Off brings normal Obsidian back.",
   "notebooks.noteSettings.muteUpdateInfo": 'Stop showing "Update available"; the gear\'s dot stays',
   "notebooks.noteSettings.renamePage": "Rename the page",
   "notebooks.noteSettings.renameNotebook": "Rename the notebook",
@@ -890,9 +892,41 @@ export const notebooks = {
   "notebooks.untitled.notebook": "Untitled notebook",
 
   // The simple look's one-time notice (main.ts).
-  "notebooks.simpleLook.noticeNew":
-    "This is the new look of FineNotes: Obsidian's sidebars, ribbon and bars are hidden. You can go back to the original any time (Simple look, in FineNotes' settings).",
+  "notebooks.simpleLook.noticeFolders":
+    "This is the new look of FineNotes: a Folders sidebar and tabs, with Obsidian's ribbon and bars hidden. You can go back to the original any time (Simple look, in FineNotes' settings).",
   "notebooks.simpleLook.undo": "Undo",
+
+  // The Folders sidebar (view/folders-sidebar.ts), shown while the simple look is on.
+  "notebooks.folders.title": "Folders",
+  "notebooks.folders.treeLabel": "Folder tree",
+  "notebooks.folders.filter": "Filter folders",
+  "notebooks.folders.filterClear": "Clear the filter",
+  "notebooks.folders.noMatch": "No folder has that name.",
+  "notebooks.folders.empty": "No folders yet. Use the new folder button above to add one.",
+  "notebooks.folders.collapseAll": "Collapse all folders",
+  "notebooks.folders.revealOpen": "Show the open folder in the list",
+  "notebooks.folders.newFolder": "New folder",
+  "notebooks.folders.newFolderName": "New folder name",
+  "notebooks.folders.newSubfolder": "New subfolder",
+  "notebooks.folders.edit": "Show options on every folder",
+  "notebooks.folders.options": "Folder options",
+  "notebooks.folders.star": "Star",
+  "notebooks.folders.unstar": "Remove the star",
+  "notebooks.folders.color": "Color…",
+  "notebooks.folders.colorTitle": "Color for {name}",
+  "notebooks.folders.renameTitle": "Rename folder",
+  "notebooks.folders.deleteTitle": "Delete this folder?",
+  "notebooks.folders.deleteBody": "“{name}” and everything in it will be moved to the trash.",
+  "notebooks.folders.sectionStarred": "Starred",
+  "notebooks.folders.sectionRecent": "Recent",
+  "notebooks.folders.sectionAll": "All folders",
+  "notebooks.folders.openFolder": "Open {name}",
+  "notebooks.folders.noteCount.one": "{count} note",
+  "notebooks.folders.noteCount.other": "{count} notes",
+  "notebooks.folders.dragHint": "Drag to move · let go for options",
+  "notebooks.folders.createFailed": "Could not create the folder: {reason}",
+  "notebooks.folders.moveFailed": "Could not move “{name}”: {reason}",
+  "notebooks.folders.exists": "“{name}” already exists in that folder.",
 
   // Home, the notebook library (view/library-view.ts and its models).
   "notebooks.home.title": "Home",

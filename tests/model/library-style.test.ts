@@ -12,16 +12,24 @@ import {
 } from "../../src/model/library-style";
 
 describe("folderStylesOf", () => {
-  it("keeps known colours and icons and drops the rest", () => {
+  it("keeps readable colours and known icons and drops the rest", () => {
     const sky = FOLDER_COLORS[0].color;
     expect(
       folderStylesOf({
         a: { color: sky, icon: "code" },
         b: { color: "#123456", icon: "nope" },
         c: 4,
+        d: { color: "not a colour", icon: "nope" },
         "": { icon: "code" },
       }),
-    ).toEqual({ a: { color: sky, icon: "code" } });
+    ).toEqual({ a: { color: sky, icon: "code" }, b: { color: "#123456" } });
+  });
+
+  it("keeps a colour of the user's own, written in full", () => {
+    expect(folderStylesOf({ a: { color: "#ABC" }, b: { color: "FF8800" } })).toEqual({
+      a: { color: "#aabbcc" },
+      b: { color: "#ff8800" },
+    });
   });
 
   it("reads anything else as no looks", () => {

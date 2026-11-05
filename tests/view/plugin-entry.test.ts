@@ -572,6 +572,7 @@ describe("registration", () => {
         "save-page-as-template",
         "share-template",
         "search-notebook",
+        "show-folders",
         "show-keyboard-shortcuts",
         "show-welcome",
         "template-gallery",
@@ -600,7 +601,7 @@ describe("registration", () => {
 
   it("registers the notebook view, the ribbon button and the two link handlers", async () => {
     await load();
-    expect([...registered.views.keys()]).toEqual([INK, "finenotes-library"]);
+    expect([...registered.views.keys()]).toEqual([INK, "finenotes-library", "finenotes-folders"]);
     expect(registered.ribbon.map((r) => r.icon)).toEqual(["finenotes-library"]);
     expect(registered.ribbon[0].title).toBe("Notebook library");
     expect(registered.ribbon[0].label).toBe("Notebook library");
@@ -790,6 +791,62 @@ describe("registration", () => {
         expect(detach).toHaveBeenCalledTimes(takenOver ? 1 : 0);
         expect(viewStateCalls.some((c) => c.state.type === "finenotes-library")).toBe(takenOver);
       }
+    });
+  });
+
+  describe("the Folders sidebar", () => {
+    /** Lay the workspace out, with a left leaf to put the sidebar in. */
+    function layOut(): WorkspaceLeaf {
+      const left = new WorkspaceLeaf();
+      const workspace = app.workspace as unknown as Record<string, unknown>;
+      workspace.layoutReady = true;
+      workspace.getLeftLeaf = () => left;
+      return left;
+    }
+
+    it("is put on the left while the simple look is on", async () => {
+      await load({ simpleLook: true });
+      const left = layOut();
+      viewStateCalls.length = 0;
+      plugin.applySimpleLook();
+      expect(viewStateCalls.map((c) => [c.leaf, c.state.type])).toEqual([
+        [left, "finenotes-folders"],
+      ]);
+    });
+
+    it("is not opened again when it is already there", async () => {
+      await load({ simpleLook: true });
+      const left = layOut();
+      plugin.applySimpleLook();
+      app.workspace.leaves.push(left);
+      viewStateCalls.length = 0;
+      plugin.applySimpleLook();
+      expect(viewStateCalls).toEqual([]);
+    });
+
+    it("is taken away when the simple look is turned off, and not made while it is off", async () => {
+      await load({ simpleLook: true });
+      const left = layOut();
+      plugin.applySimpleLook();
+      app.workspace.leaves.push(left);
+      const detach = vi.fn();
+      Object.assign(left, { detach });
+      plugin.settings.simpleLook = false;
+      plugin.applySimpleLook();
+      expect(detach).toHaveBeenCalledTimes(1);
+      viewStateCalls.length = 0;
+      plugin.applySimpleLook();
+      expect(viewStateCalls).toEqual([]);
+    });
+
+    it("offers its command only while the simple look is on", async () => {
+      await load({ simpleLook: false });
+      const show = registered.commands.find((c) => c.id === "show-folders") as unknown as {
+        checkCallback: (checking: boolean) => boolean;
+      };
+      expect(show.checkCallback(true)).toBe(false);
+      plugin.settings.simpleLook = true;
+      expect(show.checkCallback(true)).toBe(true);
     });
   });
 

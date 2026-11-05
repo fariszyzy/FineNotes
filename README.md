@@ -369,6 +369,31 @@ picture, such as a worksheet you write on; hold the lasso on it and tap
 
 PDF display uses one cached image per page, drawn at the exact resolution of the screen. Zoomed in further than that image can go (about 1.4× for an A4 page on an iPad), it sharpens only the visible portion, with at most two PDF renders in flight. On a device short of memory it keeps fewer pages around. Old visible-area renders are cancelled and their canvases released when you scroll away; ink and the sidebar keep their existing rendering paths.
 
+### The simple look and the Folders sidebar
+
+**Simple look** (FineNotes' settings; on by default) tucks Obsidian's title bar,
+status bar, ribbon and right sidebar away, so FineNotes reads as an app of its own.
+The left side keeps one thing: the **Folders** sidebar, a tree of your vault's
+folders. On an iPad it is the sidebar drawer.
+
+- **Open a folder** to see it in the notebook library. **Starred** folders and the
+  last three you opened are listed first; the number beside a folder is how many
+  notes it holds.
+- **Filter folders** narrows the tree to the names that match, with their parent
+  folders. Escape clears it.
+- **One menu per folder:** the ⋯ button, a right-click, or on an iPad holding the
+  folder and letting go. **Rename**, **New subfolder**, **Star**, **Color…**
+  (the nine presets, your recent colours, or any colour) and **Delete**, followed by
+  what Obsidian and other plugins add. The pencil at the top shows the ⋯ on every
+  folder.
+- **Move a folder** by dragging it onto another, or onto the empty part of the list for
+  the top of the vault. On an iPad, hold it until the hint appears, then drag.
+- **From the keyboard:** the arrow keys move through the tree, Right and Left open and
+  close a folder, Return opens it, and F2 renames it.
+- **Turn the simple look off** and Obsidian's own sidebars come back; the Folders
+  sidebar goes away. Stars and folder colours are the library's own, so the library
+  and the sidebar always agree.
+
 ### Search, links and export
 
 - **Search this notebook** finds typed text and transcribed handwriting.
