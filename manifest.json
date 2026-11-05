@@ -1,0 +1,10 @@
+{
+  "id": "finenotes-sidebar-pr",
+  "name": "FineNotes plugin side bar pr",
+  "version": "2.8.2",
+  "minAppVersion": "1.13.0",
+  "description": "TEST COPY of FineNotes with the Folders sidebar for the simple look (pull request). Turn the normal FineNotes off before turning this on.",
+  "author": "Joost",
+  "fundingUrl": "https://github.com/sponsors/Joost-8",
+  "isDesktopOnly": false
+}
