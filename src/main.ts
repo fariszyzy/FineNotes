@@ -724,6 +724,13 @@ export default class GoodObsidianPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on("layout-change", () => this.syncExplorerNotebookButton()),
     );
+    // A Folders sidebar never stays an unloaded placeholder (see syncFoldersSidebar).
+    this.registerEvent(
+      this.app.workspace.on("layout-change", () => {
+        for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_FOLDERS))
+          if (leaf.isDeferred) void leaf.loadIfDeferred();
+      }),
+    );
     this.app.workspace.onLayoutReady(() => this.syncExplorerNotebookButton());
     // The library is the way in: notebooks are made there (its +), not from a ribbon icon of their own.
     // Obsidian keeps a ribbon icon's place (hidden, moved) by its title, so the
@@ -808,9 +815,18 @@ export default class GoodObsidianPlugin extends Plugin {
       for (const leaf of open) leaf.detach();
       return;
     }
-    if (open.length > 0) return;
+    // A leaf restored from the saved layout comes back deferred: its tab says
+    // "Folders" but the view is not loaded, and an iPad drawer can show it
+    // like that, empty. Load it as soon as it is found.
+    if (open.length > 0) {
+      for (const leaf of open) if (leaf.isDeferred) void leaf.loadIfDeferred();
+      return;
+    }
     const leaf = this.app.workspace.getLeftLeaf(false);
-    if (leaf) void leaf.setViewState({ type: VIEW_TYPE_FOLDERS, active: true });
+    if (leaf)
+      void leaf
+        .setViewState({ type: VIEW_TYPE_FOLDERS, active: true })
+        .then(() => leaf.loadIfDeferred());
   }
 
   async openLibrary(into?: WorkspaceLeaf): Promise<void> {

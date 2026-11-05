@@ -181,6 +181,17 @@ export class WorkspaceLeaf {
   setPinned(pinned: boolean): void {
     this.pinned = pinned;
   }
+
+  /** Obsidian 1.7.2+: a leaf restored in the background is a placeholder until loaded. */
+  isDeferred = false;
+  loads = 0;
+  loadIfDeferred(): Promise<void> {
+    if (this.isDeferred) {
+      this.isDeferred = false;
+      this.loads++;
+    }
+    return Promise.resolve();
+  }
 }
 
 export class TFolder {

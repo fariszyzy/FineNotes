@@ -824,6 +824,21 @@ describe("registration", () => {
       expect(viewStateCalls).toEqual([]);
     });
 
+    it("is loaded when it was restored as a placeholder, at once and on layout changes", async () => {
+      await load({ simpleLook: true });
+      const left = layOut();
+      left.state = { type: "finenotes-folders", state: {} };
+      left.isDeferred = true;
+      app.workspace.leaves.push(left);
+      viewStateCalls.length = 0;
+      plugin.applySimpleLook();
+      expect(viewStateCalls).toEqual([]);
+      expect(left.loads).toBe(1);
+      left.isDeferred = true;
+      app.workspace.trigger("layout-change");
+      expect(left.loads).toBe(2);
+    });
+
     it("is taken away when the simple look is turned off, and not made while it is off", async () => {
       await load({ simpleLook: true });
       const left = layOut();
